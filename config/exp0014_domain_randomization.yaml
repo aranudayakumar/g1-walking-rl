@@ -1,0 +1,80 @@
+# EXP-0014: identical to exp0011_gait_quality_v2.yaml (the canonical
+# baseline's reward/PPO config, unchanged) plus domain randomization
+# (PROJECT_PLAN.md Phase 8), added now that basic walking is confirmed
+# working robustly (docs/DECISIONS.md ADR-004/ADR-005). Single conceptual
+# change: physics randomization only, reward untouched, so any effect is
+# attributable to domain randomization alone.
+#
+# Ranges (informed starting points, not yet tuned):
+# - floor_friction_range [0.5, 1.5]: a common range in the legged-
+#   locomotion DR literature (icy to high-grip surfaces), multiplicative
+#   on the nominal 1.0 sliding friction already set in scene_walk.xml.
+# - mass_scale_range [0.85, 1.15]: +/-15% global mass variation (payload/
+#   manufacturing tolerance), applied to mass AND inertia together
+#   (envs/domain_randomization.DomainRandomizer) to stay physically
+#   consistent.
+# - motor_strength_range [0.7, 1.0]: real motors rarely exceed their rated
+#   torque (upper bound 1.0), but can underperform (battery sag, wear,
+#   thermal derating) -- modeled as a per-episode torque multiplier.
+# - push_interval_s_range [3.0, 6.0], push_velocity_range [0.1, 0.5]:
+#   a modest horizontal velocity impulse every few seconds (roughly a
+#   person bumping the robot), not constant chaos -- deliberately modest
+#   given the policy has never trained under any perturbation before.
+model_path: assets/g1/scene_walk.xml
+
+sim:
+  physics_dt: 0.002
+  control_decimation: 10
+  episode_seconds: 20.0
+
+action:
+  action_scale: 0.25
+
+pd_gains:
+  hip_pitch:   {kp: 100, kd: 2}
+  hip_roll:    {kp: 100, kd: 2}
+  hip_yaw:     {kp: 100, kd: 2}
+  knee:        {kp: 150, kd: 4}
+  ankle_pitch: {kp: 40,  kd: 2}
+  ankle_roll:  {kp: 40,  kd: 2}
+
+command:
+  vx_range: [0.0, 0.6]
+  vy_range: [-0.2, 0.2]
+
+reward_weights:
+  tracking_lin_vel: 1.0
+  tracking_sigma: 0.25
+  alive_bonus: 0.5
+  torque_penalty: 0.0002
+  ang_vel_penalty: 0.1
+  action_rate_penalty: 0.01
+
+termination:
+  min_pelvis_height_m: 0.5
+  min_projected_gravity_z: -0.3
+
+domain_randomization:
+  enabled: true
+  floor_friction_range: [0.5, 1.5]
+  mass_scale_range: [0.85, 1.15]
+  motor_strength_range: [0.7, 1.0]
+  push_interval_s_range: [3.0, 6.0]
+  push_velocity_range: [0.1, 0.5]
+
+ppo:
+  algorithm: PPO
+  policy: MlpPolicy
+  device: cpu
+  learning_rate: 3.0e-4
+  n_steps: 1024
+  batch_size: 256
+  n_epochs: 10
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_range: 0.2
+  ent_coef: 0.0
+  vf_coef: 0.5
+  max_grad_norm: 0.5
+  policy_net: [256, 256]
+  value_net: [256, 256]

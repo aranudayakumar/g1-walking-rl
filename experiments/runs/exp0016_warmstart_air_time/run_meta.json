@@ -1,0 +1,13 @@
+{
+  "run_name": "exp0016_warmstart_air_time",
+  "timesteps": 5000000,
+  "n_envs": 12,
+  "seed": 0,
+  "subproc": true,
+  "config_path": "config/exp0012_air_time.yaml",
+  "init_from": "experiments/runs/exp0011_gait_quality_v2/best_checkpoint_10M.zip",
+  "init_learning_rate": 5e-05,
+  "started_at": "2026-09-18T17:17:29",
+  "elapsed_seconds": 693.7800340652466,
+  "finished_at": "2026-09-18T17:29:03"
+}

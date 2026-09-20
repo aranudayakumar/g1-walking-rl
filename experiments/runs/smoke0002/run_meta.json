@@ -1,0 +1,11 @@
+{
+  "run_name": "smoke0002",
+  "timesteps": 4096,
+  "n_envs": 2,
+  "seed": 0,
+  "subproc": false,
+  "config_path": "config/default.yaml",
+  "started_at": "2026-09-18T01:11:09",
+  "elapsed_seconds": 2.0028369426727295,
+  "finished_at": "2026-09-18T01:11:11"
+}

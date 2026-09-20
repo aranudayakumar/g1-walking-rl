@@ -1,0 +1,68 @@
+# EXP-0010: identical to default.yaml (the config behind the current
+# canonical baseline, exp0009_longer_baseline), plus two new reward terms
+# motivated by a specific, measured failure (docs/FAILURE_ANALYSIS.md
+# F-0003): the canonical policy doesn't walk straight (95 deg yaw drift
+# over 10s under a pure-forward command) and takes tiny, chattery steps
+# rather than clean strides.
+#
+# ang_vel_penalty=1.0: same order of magnitude as tracking_lin_vel's own
+# weight (1.0), so it can meaningfully compete once yaw rate is nonzero,
+# without dominating the reward at the small yaw rates a normal gait needs
+# for balance.
+# action_rate_penalty=0.01: a standard starting value for this term in the
+# legged-locomotion RL literature (e.g. Rudin et al. 2021 / legged_gym-
+# style configs use action-rate weights of this order); revisit if
+# evidence says it's too weak/strong once results come in.
+# Neither value has been tuned yet -- both are informed starting points
+# to be judged by evaluation, per CLAUDE.md ("do not cargo-cult a reward
+# term without tracing why it exists").
+model_path: assets/g1/scene_walk.xml
+
+sim:
+  physics_dt: 0.002
+  control_decimation: 10
+  episode_seconds: 20.0
+
+action:
+  action_scale: 0.25
+
+pd_gains:
+  hip_pitch:   {kp: 100, kd: 2}
+  hip_roll:    {kp: 100, kd: 2}
+  hip_yaw:     {kp: 100, kd: 2}
+  knee:        {kp: 150, kd: 4}
+  ankle_pitch: {kp: 40,  kd: 2}
+  ankle_roll:  {kp: 40,  kd: 2}
+
+command:
+  vx_range: [0.0, 0.6]
+  vy_range: [-0.2, 0.2]
+
+reward_weights:
+  tracking_lin_vel: 1.0
+  tracking_sigma: 0.25
+  alive_bonus: 0.5
+  torque_penalty: 0.0002
+  ang_vel_penalty: 1.0
+  action_rate_penalty: 0.01
+
+termination:
+  min_pelvis_height_m: 0.5
+  min_projected_gravity_z: -0.3
+
+ppo:
+  algorithm: PPO
+  policy: MlpPolicy
+  device: cpu
+  learning_rate: 3.0e-4
+  n_steps: 1024
+  batch_size: 256
+  n_epochs: 10
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_range: 0.2
+  ent_coef: 0.0
+  vf_coef: 0.5
+  max_grad_norm: 0.5
+  policy_net: [256, 256]
+  value_net: [256, 256]

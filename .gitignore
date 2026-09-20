@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+# large/regenerable training byproducts; best_checkpoint_*.zip, eval JSON, curves and videos are kept
+experiments/runs/*/checkpoints/
+experiments/runs/*/events.out.tfevents.*
+experiments/runs/*/final_model.zip

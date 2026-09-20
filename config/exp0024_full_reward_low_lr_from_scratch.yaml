@@ -1,0 +1,64 @@
+# EXP-0024: identical reward weights to config/exp0022_full_curriculum_from_scratch.yaml
+# (exp0019's full multi-term reward: feet_air_time_bonus=6.0 +
+# heading_deviation_penalty=0.5, on top of the base gait-quality terms),
+# but with ppo.learning_rate lowered to 5.0e-5 (matching
+# config/exp0023_low_lr_from_scratch.yaml) instead of the standard 3.0e-4.
+# Single conceptual change relative to exp0022: learning rate only. Tests
+# whether EXP-0022's collapse (never learned to walk, standing-still
+# degenerate optimum) was caused by PPO instability under a rich reward
+# at standard LR, or by something else -- since EXP-0023 already showed
+# low LR alone fixes the *simpler* reward's oscillation, but with a
+# small/chattery stride the minimal reward doesn't discourage.
+model_path: assets/g1/scene_walk.xml
+
+sim:
+  physics_dt: 0.002
+  control_decimation: 10
+  episode_seconds: 20.0
+
+action:
+  action_scale: 0.25
+
+pd_gains:
+  hip_pitch:   {kp: 100, kd: 2}
+  hip_roll:    {kp: 100, kd: 2}
+  hip_yaw:     {kp: 100, kd: 2}
+  knee:        {kp: 150, kd: 4}
+  ankle_pitch: {kp: 40,  kd: 2}
+  ankle_roll:  {kp: 40,  kd: 2}
+
+command:
+  vx_range: [0.0, 0.6]
+  vy_range: [-0.2, 0.2]
+
+reward_weights:
+  tracking_lin_vel: 1.0
+  tracking_sigma: 0.25
+  alive_bonus: 0.5
+  torque_penalty: 0.0002
+  ang_vel_penalty: 0.1
+  action_rate_penalty: 0.01
+  feet_air_time_bonus: 6.0
+  feet_air_time_threshold_s: 0.2
+  heading_deviation_penalty: 0.5
+
+termination:
+  min_pelvis_height_m: 0.5
+  min_projected_gravity_z: -0.3
+
+ppo:
+  algorithm: PPO
+  policy: MlpPolicy
+  device: cpu
+  learning_rate: 5.0e-5
+  n_steps: 1024
+  batch_size: 256
+  n_epochs: 10
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_range: 0.2
+  ent_coef: 0.0
+  vf_coef: 0.5
+  max_grad_norm: 0.5
+  policy_net: [256, 256]
+  value_net: [256, 256]

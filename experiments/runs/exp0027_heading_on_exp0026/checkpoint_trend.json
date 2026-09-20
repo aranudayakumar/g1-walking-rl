@@ -1,0 +1,34 @@
+{
+  "999996": {
+    "mean_len_s": 19.398,
+    "mean_dist_ratio_reliable": 0.996039130992148,
+    "n_reliable": 20,
+    "falls": 2,
+    "n_episodes": 20,
+    "mean_abs_yaw_drift_per_10s_deg": 21.937043991106616
+  },
+  "1999992": {
+    "mean_len_s": 15.9,
+    "mean_dist_ratio_reliable": 0.3888382679656349,
+    "n_reliable": 15,
+    "falls": 5,
+    "n_episodes": 20,
+    "mean_abs_yaw_drift_per_10s_deg": 31.955452592326026
+  },
+  "2999988": {
+    "mean_len_s": 11.907,
+    "mean_dist_ratio_reliable": 0.7097593555851358,
+    "n_reliable": 10,
+    "falls": 10,
+    "n_episodes": 20,
+    "mean_abs_yaw_drift_per_10s_deg": 60.83627428836637
+  },
+  "3000000": {
+    "mean_len_s": 12.175,
+    "mean_dist_ratio_reliable": 0.7499647771094009,
+    "n_reliable": 10,
+    "falls": 10,
+    "n_episodes": 20,
+    "mean_abs_yaw_drift_per_10s_deg": 64.42791620658056
+  }
+}

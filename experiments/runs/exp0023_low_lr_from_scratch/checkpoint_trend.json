@@ -1,0 +1,50 @@
+{
+  "1999992": {
+    "mean_len_s": 20.0,
+    "mean_dist_ratio_reliable": 0.026011379387332622,
+    "n_reliable": 20,
+    "falls": 0,
+    "n_episodes": 20,
+    "mean_abs_yaw_drift_per_10s_deg": 10.326114215427086
+  },
+  "3999984": {
+    "mean_len_s": 16.488,
+    "mean_dist_ratio_reliable": 0.29762225089831335,
+    "n_reliable": 16,
+    "falls": 4,
+    "n_episodes": 20,
+    "mean_abs_yaw_drift_per_10s_deg": 45.49197731445955
+  },
+  "5999976": {
+    "mean_len_s": 18.225,
+    "mean_dist_ratio_reliable": 0.4413590151482489,
+    "n_reliable": 18,
+    "falls": 2,
+    "n_episodes": 20,
+    "mean_abs_yaw_drift_per_10s_deg": 63.29189543489649
+  },
+  "7999968": {
+    "mean_len_s": 20.0,
+    "mean_dist_ratio_reliable": 0.8479264218112619,
+    "n_reliable": 20,
+    "falls": 0,
+    "n_episodes": 20,
+    "mean_abs_yaw_drift_per_10s_deg": 30.449637273694854
+  },
+  "9999960": {
+    "mean_len_s": 20.0,
+    "mean_dist_ratio_reliable": 0.7598066273087414,
+    "n_reliable": 20,
+    "falls": 0,
+    "n_episodes": 20,
+    "mean_abs_yaw_drift_per_10s_deg": 47.93921921793758
+  },
+  "10000000": {
+    "mean_len_s": 20.0,
+    "mean_dist_ratio_reliable": 0.7562424607140755,
+    "n_reliable": 20,
+    "falls": 0,
+    "n_episodes": 20,
+    "mean_abs_yaw_drift_per_10s_deg": 48.33085708877371
+  }
+}

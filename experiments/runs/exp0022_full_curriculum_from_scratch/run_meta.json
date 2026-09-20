@@ -1,0 +1,13 @@
+{
+  "run_name": "exp0022_full_curriculum_from_scratch",
+  "timesteps": 20000000,
+  "n_envs": 12,
+  "seed": 0,
+  "subproc": true,
+  "config_path": "config/exp0022_full_curriculum_from_scratch.yaml",
+  "init_from": null,
+  "init_learning_rate": null,
+  "started_at": "2026-09-19T13:54:27",
+  "elapsed_seconds": 2990.76322388649,
+  "finished_at": "2026-09-19T14:44:18"
+}

@@ -1,0 +1,11 @@
+{
+  "run_name": "baseline0001",
+  "timesteps": 3000000,
+  "n_envs": 12,
+  "seed": 0,
+  "subproc": true,
+  "config_path": "config/default.yaml",
+  "started_at": "2026-09-18T01:12:36",
+  "elapsed_seconds": 413.6267659664154,
+  "finished_at": "2026-09-18T01:19:30"
+}

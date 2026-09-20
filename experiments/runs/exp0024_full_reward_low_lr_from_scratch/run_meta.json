@@ -1,0 +1,13 @@
+{
+  "run_name": "exp0024_full_reward_low_lr_from_scratch",
+  "timesteps": 20000000,
+  "n_envs": 12,
+  "seed": 0,
+  "subproc": true,
+  "config_path": "config/exp0024_full_reward_low_lr_from_scratch.yaml",
+  "init_from": null,
+  "init_learning_rate": null,
+  "started_at": "2026-09-19T15:45:35",
+  "elapsed_seconds": 2644.2840740680695,
+  "finished_at": "2026-09-19T16:29:39"
+}

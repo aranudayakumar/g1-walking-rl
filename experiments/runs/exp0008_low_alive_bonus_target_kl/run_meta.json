@@ -1,0 +1,11 @@
+{
+  "run_name": "exp0008_low_alive_bonus_target_kl",
+  "timesteps": 3000000,
+  "n_envs": 12,
+  "seed": 0,
+  "subproc": true,
+  "config_path": "config/exp0008_low_alive_bonus_target_kl.yaml",
+  "started_at": "2026-09-18T09:51:04",
+  "elapsed_seconds": 278.9062530994415,
+  "finished_at": "2026-09-18T09:55:43"
+}

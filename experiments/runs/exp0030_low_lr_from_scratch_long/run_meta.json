@@ -1,0 +1,13 @@
+{
+  "run_name": "exp0030_low_lr_from_scratch_long",
+  "timesteps": 10000000,
+  "n_envs": 12,
+  "seed": 0,
+  "subproc": true,
+  "config_path": "config/exp0023_low_lr_from_scratch.yaml",
+  "init_from": "experiments/runs/exp0023_low_lr_from_scratch/final_model.zip",
+  "init_learning_rate": 5e-05,
+  "started_at": "2026-09-19T23:56:13",
+  "elapsed_seconds": 1411.5672519207,
+  "finished_at": "2026-09-20T00:19:45"
+}

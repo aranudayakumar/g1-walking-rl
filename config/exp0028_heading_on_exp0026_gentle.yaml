@@ -1,0 +1,61 @@
+# EXP-0028: identical to config/exp0027_heading_on_exp0026.yaml except
+# heading_deviation_penalty halved (2.0 -> 1.0). EXP-0027's 1M checkpoint
+# showed the hypothesis works (dist_ratio=0.996, controlled heading tied
+# exp0019's best-in-project -7.5 deg/10s, real stride) but training
+# destabilized after that point (falls climbing 2/20 -> 5/20 -> 10/20 by
+# 3M) -- testing whether a gentler push gets most of the heading benefit
+# without the fall regression, checked more frequently to catch the best
+# point before any destabilization.
+model_path: assets/g1/scene_walk.xml
+
+sim:
+  physics_dt: 0.002
+  control_decimation: 10
+  episode_seconds: 20.0
+
+action:
+  action_scale: 0.25
+
+pd_gains:
+  hip_pitch:   {kp: 100, kd: 2}
+  hip_roll:    {kp: 100, kd: 2}
+  hip_yaw:     {kp: 100, kd: 2}
+  knee:        {kp: 150, kd: 4}
+  ankle_pitch: {kp: 40,  kd: 2}
+  ankle_roll:  {kp: 40,  kd: 2}
+
+command:
+  vx_range: [0.0, 0.6]
+  vy_range: [-0.2, 0.2]
+
+reward_weights:
+  tracking_lin_vel: 1.0
+  tracking_sigma: 0.25
+  alive_bonus: 0.5
+  torque_penalty: 0.0002
+  ang_vel_penalty: 0.1
+  action_rate_penalty: 0.01
+  feet_air_time_bonus: 3.0
+  feet_air_time_threshold_s: 0.2
+  heading_deviation_penalty: 1.0
+
+termination:
+  min_pelvis_height_m: 0.5
+  min_projected_gravity_z: -0.3
+
+ppo:
+  algorithm: PPO
+  policy: MlpPolicy
+  device: cpu
+  learning_rate: 3.0e-4
+  n_steps: 1024
+  batch_size: 256
+  n_epochs: 10
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_range: 0.2
+  ent_coef: 0.0
+  vf_coef: 0.5
+  max_grad_norm: 0.5
+  policy_net: [256, 256]
+  value_net: [256, 256]

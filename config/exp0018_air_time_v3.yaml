@@ -1,0 +1,62 @@
+# EXP-0018: identical to exp0012_air_time.yaml, single conceptual change --
+# feet_air_time_bonus doubled 3.0 -> 6.0 (feet_air_time_threshold_s
+# unchanged at 0.2s). EXP-0017 showed swing duration plateaued at ~40-48ms
+# median/mean despite still being far short of the 0.2s target -- measured
+# (not guessed) whether the current weight is simply too weak to keep
+# pushing: replayed exp0017's own gait through the reward math at
+# candidate weights. At 6.0, the per-step cost is -0.131 (vs -0.066 at
+# 3.0), about 14% of the gait's own (much-improved) mean tracking reward
+# of 0.952/step -- a moderate, safe escalation, well short of the >50%
+# ratio that caused EXP-0010's collapse.
+model_path: assets/g1/scene_walk.xml
+
+sim:
+  physics_dt: 0.002
+  control_decimation: 10
+  episode_seconds: 20.0
+
+action:
+  action_scale: 0.25
+
+pd_gains:
+  hip_pitch:   {kp: 100, kd: 2}
+  hip_roll:    {kp: 100, kd: 2}
+  hip_yaw:     {kp: 100, kd: 2}
+  knee:        {kp: 150, kd: 4}
+  ankle_pitch: {kp: 40,  kd: 2}
+  ankle_roll:  {kp: 40,  kd: 2}
+
+command:
+  vx_range: [0.0, 0.6]
+  vy_range: [-0.2, 0.2]
+
+reward_weights:
+  tracking_lin_vel: 1.0
+  tracking_sigma: 0.25
+  alive_bonus: 0.5
+  torque_penalty: 0.0002
+  ang_vel_penalty: 0.1
+  action_rate_penalty: 0.01
+  feet_air_time_bonus: 6.0
+  feet_air_time_threshold_s: 0.2
+
+termination:
+  min_pelvis_height_m: 0.5
+  min_projected_gravity_z: -0.3
+
+ppo:
+  algorithm: PPO
+  policy: MlpPolicy
+  device: cpu
+  learning_rate: 3.0e-4
+  n_steps: 1024
+  batch_size: 256
+  n_epochs: 10
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_range: 0.2
+  ent_coef: 0.0
+  vf_coef: 0.5
+  max_grad_norm: 0.5
+  policy_net: [256, 256]
+  value_net: [256, 256]

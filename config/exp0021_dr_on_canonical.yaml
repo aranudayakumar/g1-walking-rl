@@ -1,0 +1,70 @@
+# EXP-0021: the current canonical reward (exp0012_air_time.yaml, behind
+# exp0017 -- feet_air_time_bonus included) plus the same domain-
+# randomization block already validated in EXP-0014/0015
+# (config/exp0014_domain_randomization.yaml), unchanged. Single conceptual
+# change relative to canonical: physics randomization only, reward
+# untouched, so any effect is attributable to domain randomization alone
+# (same logic as EXP-0014's own header). This re-runs the DR recipe on top
+# of the post-EXP-0016/0017 stepping-quality gait, since EXP-0015's DR
+# checkpoint was trained on the pre-EXP-0016 reward (no
+# feet_air_time_bonus) -- see PROJECT_STATE.md "highest-value next step" #3.
+model_path: assets/g1/scene_walk.xml
+
+sim:
+  physics_dt: 0.002
+  control_decimation: 10
+  episode_seconds: 20.0
+
+action:
+  action_scale: 0.25
+
+pd_gains:
+  hip_pitch:   {kp: 100, kd: 2}
+  hip_roll:    {kp: 100, kd: 2}
+  hip_yaw:     {kp: 100, kd: 2}
+  knee:        {kp: 150, kd: 4}
+  ankle_pitch: {kp: 40,  kd: 2}
+  ankle_roll:  {kp: 40,  kd: 2}
+
+command:
+  vx_range: [0.0, 0.6]
+  vy_range: [-0.2, 0.2]
+
+reward_weights:
+  tracking_lin_vel: 1.0
+  tracking_sigma: 0.25
+  alive_bonus: 0.5
+  torque_penalty: 0.0002
+  ang_vel_penalty: 0.1
+  action_rate_penalty: 0.01
+  feet_air_time_bonus: 3.0
+  feet_air_time_threshold_s: 0.2
+
+termination:
+  min_pelvis_height_m: 0.5
+  min_projected_gravity_z: -0.3
+
+domain_randomization:
+  enabled: true
+  floor_friction_range: [0.5, 1.5]
+  mass_scale_range: [0.85, 1.15]
+  motor_strength_range: [0.7, 1.0]
+  push_interval_s_range: [3.0, 6.0]
+  push_velocity_range: [0.1, 0.5]
+
+ppo:
+  algorithm: PPO
+  policy: MlpPolicy
+  device: cpu
+  learning_rate: 3.0e-4
+  n_steps: 1024
+  batch_size: 256
+  n_epochs: 10
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_range: 0.2
+  ent_coef: 0.0
+  vf_coef: 0.5
+  max_grad_norm: 0.5
+  policy_net: [256, 256]
+  value_net: [256, 256]

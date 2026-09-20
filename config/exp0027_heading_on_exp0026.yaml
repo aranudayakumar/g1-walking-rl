@@ -1,0 +1,73 @@
+# EXP-0027: identical to config/exp0012_air_time.yaml (the canonical
+# exp0026 reward, unchanged) plus one new term: heading_deviation_penalty,
+# added to try to close the one remaining gap on the new canonical
+# baseline (ADR-011) -- exp0019 still holds the single best
+# controlled-heading measurement in the project (-7.5 deg/10s) vs.
+# exp0026's -14.1 deg/10s, though exp0026 beats it on every other axis.
+#
+# heading_deviation_penalty weight=2.0: measured, not reused from
+# exp0019's weight=0.5 (see experiments/EXPERIMENT_LOG.md EXP-0027) --
+# replaying exp0026's own gait through the controlled straight-line test
+# (vx=0.3, vy=0) gives mean_heading_dev_sq=0.0207, which would cost only
+# 0.8% of exp0026's ~1.36/step reward at weight=0.5 (far gentler than the
+# ~6% cost that weight=0.5 imposed on exp0018's worse-heading gait when
+# exp0019 was calibrated) -- exp0026 already has much better heading than
+# exp0018 did, so a much smaller residual cost at the same weight is
+# expected, not a sign the term would have no effect. Scaling to a
+# comparable ~3% cost (a real but moderate push, roughly half of
+# exp0019's original aggressiveness, chosen cautiously given exp0026's
+# lineage already showed more training on the *same* recipe made things
+# worse, not better) needs weight=2.0.
+model_path: assets/g1/scene_walk.xml
+
+sim:
+  physics_dt: 0.002
+  control_decimation: 10
+  episode_seconds: 20.0
+
+action:
+  action_scale: 0.25
+
+pd_gains:
+  hip_pitch:   {kp: 100, kd: 2}
+  hip_roll:    {kp: 100, kd: 2}
+  hip_yaw:     {kp: 100, kd: 2}
+  knee:        {kp: 150, kd: 4}
+  ankle_pitch: {kp: 40,  kd: 2}
+  ankle_roll:  {kp: 40,  kd: 2}
+
+command:
+  vx_range: [0.0, 0.6]
+  vy_range: [-0.2, 0.2]
+
+reward_weights:
+  tracking_lin_vel: 1.0
+  tracking_sigma: 0.25
+  alive_bonus: 0.5
+  torque_penalty: 0.0002
+  ang_vel_penalty: 0.1
+  action_rate_penalty: 0.01
+  feet_air_time_bonus: 3.0
+  feet_air_time_threshold_s: 0.2
+  heading_deviation_penalty: 2.0
+
+termination:
+  min_pelvis_height_m: 0.5
+  min_projected_gravity_z: -0.3
+
+ppo:
+  algorithm: PPO
+  policy: MlpPolicy
+  device: cpu
+  learning_rate: 3.0e-4
+  n_steps: 1024
+  batch_size: 256
+  n_epochs: 10
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_range: 0.2
+  ent_coef: 0.0
+  vf_coef: 0.5
+  max_grad_norm: 0.5
+  policy_net: [256, 256]
+  value_net: [256, 256]

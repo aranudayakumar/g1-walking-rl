@@ -1,0 +1,11 @@
+{
+  "run_name": "exp0015_domain_randomization_long",
+  "timesteps": 20000000,
+  "n_envs": 12,
+  "seed": 0,
+  "subproc": true,
+  "config_path": "config/exp0014_domain_randomization.yaml",
+  "started_at": "2026-09-18T14:50:25",
+  "elapsed_seconds": 6463.604454755783,
+  "finished_at": "2026-09-18T16:38:08"
+}

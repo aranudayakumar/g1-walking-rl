@@ -1,0 +1,13 @@
+{
+  "run_name": "exp0029_dr_on_exp0026",
+  "timesteps": 10000000,
+  "n_envs": 12,
+  "seed": 0,
+  "subproc": true,
+  "config_path": "config/exp0021_dr_on_canonical.yaml",
+  "init_from": "experiments/runs/exp0026_air_time_on_exp0023_long/best_checkpoint_2M.zip",
+  "init_learning_rate": 5e-05,
+  "started_at": "2026-09-19T17:52:26",
+  "elapsed_seconds": 1375.2518200874329,
+  "finished_at": "2026-09-19T18:15:21"
+}

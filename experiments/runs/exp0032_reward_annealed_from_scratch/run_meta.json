@@ -1,0 +1,23 @@
+{
+  "run_name": "exp0032_reward_annealed_from_scratch",
+  "timesteps": 20000000,
+  "n_envs": 12,
+  "seed": 0,
+  "subproc": true,
+  "config_path": "config/exp0032_reward_annealed_from_scratch.yaml",
+  "init_from": null,
+  "init_learning_rate": null,
+  "reward_schedule": {
+    "feet_air_time_bonus": {
+      "start": 0.0,
+      "end": 6.0,
+      "end_fraction": 0.4
+    },
+    "heading_deviation_penalty": {
+      "start": 0.0,
+      "end": 0.5,
+      "end_fraction": 0.4
+    }
+  },
+  "started_at": "2026-09-20T12:46:55"
+}

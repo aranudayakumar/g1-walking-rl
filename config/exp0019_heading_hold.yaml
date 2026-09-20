@@ -1,0 +1,71 @@
+# EXP-0019: identical to exp0018_air_time_v3.yaml (feet_air_time_bonus=6.0,
+# the higher-stride-duration config that traded away heading control, ADR-009)
+# plus one new term: heading_deviation_penalty, added specifically to try to
+# recover the heading control ADR-009 lost, while keeping the longer strides.
+#
+# heading_deviation_penalty targets NET drift directly (deviation from the
+# heading at episode start), unlike ang_vel_penalty (instantaneous rotation
+# rate squared, which can't distinguish a small steady bias from a larger
+# but zero-mean oscillation -- measured: exp0017's good-heading gait and
+# exp0018's bad-heading gait have nearly identical mean ang_vel_z^2, yet
+# very different net drift).
+#
+# weight=0.5: measured against both gaits on the controlled straight-line
+# test (vx=0.3, vy=0) before choosing -- exp0017 (good heading, 19deg drift
+# in this measurement) costs 0.019/step at this weight; exp0018 (bad
+# heading, 28deg drift) costs 0.056/step -- a real, meaningful gap (~6% of
+# the ~0.94 tracking reward for the bad-heading gait) without being an
+# overwhelming tax on the already-decent gait.
+model_path: assets/g1/scene_walk.xml
+
+sim:
+  physics_dt: 0.002
+  control_decimation: 10
+  episode_seconds: 20.0
+
+action:
+  action_scale: 0.25
+
+pd_gains:
+  hip_pitch:   {kp: 100, kd: 2}
+  hip_roll:    {kp: 100, kd: 2}
+  hip_yaw:     {kp: 100, kd: 2}
+  knee:        {kp: 150, kd: 4}
+  ankle_pitch: {kp: 40,  kd: 2}
+  ankle_roll:  {kp: 40,  kd: 2}
+
+command:
+  vx_range: [0.0, 0.6]
+  vy_range: [-0.2, 0.2]
+
+reward_weights:
+  tracking_lin_vel: 1.0
+  tracking_sigma: 0.25
+  alive_bonus: 0.5
+  torque_penalty: 0.0002
+  ang_vel_penalty: 0.1
+  action_rate_penalty: 0.01
+  feet_air_time_bonus: 6.0
+  feet_air_time_threshold_s: 0.2
+  heading_deviation_penalty: 0.5
+
+termination:
+  min_pelvis_height_m: 0.5
+  min_projected_gravity_z: -0.3
+
+ppo:
+  algorithm: PPO
+  policy: MlpPolicy
+  device: cpu
+  learning_rate: 3.0e-4
+  n_steps: 1024
+  batch_size: 256
+  n_epochs: 10
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_range: 0.2
+  ent_coef: 0.0
+  vf_coef: 0.5
+  max_grad_norm: 0.5
+  policy_net: [256, 256]
+  value_net: [256, 256]

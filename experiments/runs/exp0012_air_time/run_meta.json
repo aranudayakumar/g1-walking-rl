@@ -1,0 +1,11 @@
+{
+  "run_name": "exp0012_air_time",
+  "timesteps": 10000000,
+  "n_envs": 12,
+  "seed": 0,
+  "subproc": true,
+  "config_path": "config/exp0012_air_time.yaml",
+  "started_at": "2026-09-18T12:36:41",
+  "elapsed_seconds": 2261.4299867153168,
+  "finished_at": "2026-09-18T13:14:23"
+}

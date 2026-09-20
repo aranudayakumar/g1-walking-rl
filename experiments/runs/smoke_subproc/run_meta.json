@@ -1,0 +1,11 @@
+{
+  "run_name": "smoke_subproc",
+  "timesteps": 8192,
+  "n_envs": 8,
+  "seed": 0,
+  "subproc": true,
+  "config_path": "config/default.yaml",
+  "started_at": "2026-09-18T01:11:45",
+  "elapsed_seconds": 1.3730320930480957,
+  "finished_at": "2026-09-18T01:11:46"
+}

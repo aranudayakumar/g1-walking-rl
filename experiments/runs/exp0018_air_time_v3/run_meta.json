@@ -1,0 +1,13 @@
+{
+  "run_name": "exp0018_air_time_v3",
+  "timesteps": 8000000,
+  "n_envs": 12,
+  "seed": 0,
+  "subproc": true,
+  "config_path": "config/exp0018_air_time_v3.yaml",
+  "init_from": "experiments/runs/exp0017_warmstart_air_time_long/best_checkpoint_8M.zip",
+  "init_learning_rate": 5e-05,
+  "started_at": "2026-09-18T22:07:07",
+  "elapsed_seconds": 1427.733325958252,
+  "finished_at": "2026-09-18T22:30:55"
+}

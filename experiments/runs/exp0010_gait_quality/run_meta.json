@@ -1,0 +1,11 @@
+{
+  "run_name": "exp0010_gait_quality",
+  "timesteps": 10000000,
+  "n_envs": 12,
+  "seed": 0,
+  "subproc": true,
+  "config_path": "config/exp0010_gait_quality.yaml",
+  "started_at": "2026-09-18T10:34:14",
+  "elapsed_seconds": 1283.1199600696564,
+  "finished_at": "2026-09-18T10:55:37"
+}

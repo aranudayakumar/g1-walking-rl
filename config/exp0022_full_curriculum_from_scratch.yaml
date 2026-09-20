@@ -1,0 +1,70 @@
+# EXP-0022: identical reward/PPO config to exp0019_heading_hold.yaml (the
+# best-heading point on the 3-way Pareto surface: feet_air_time_bonus=6.0 +
+# heading_deviation_penalty=0.5 on top of the base gait-quality terms), but
+# trained entirely from scratch (no --init-from) instead of via the
+# sequential fine-tuning chain that actually produced exp0019
+# (exp0011 -> exp0016 -> exp0017 -> exp0018 -> exp0019, each stage a
+# low-LR fine-tune introducing one more term). Single conceptual change:
+# curriculum order/method only, reward weights and PPO hyperparameters
+# (including the standard 3e-4 learning rate, not a fine-tune LR) are
+# byte-for-byte identical to exp0019_heading_hold.yaml.
+#
+# Purpose: test whether the 3-way Pareto trade-off (docs/DECISIONS.md
+# ADR-009/ADR-010 -- no checkpoint simultaneously matches exp0017's
+# tracking precision, exp0018/19's stride length, and exp0019's heading
+# control) is a fundamental property of this reward combination, or an
+# artifact of the sequential fine-tuning path locking in each stage's
+# local optimum before the next term is introduced.
+model_path: assets/g1/scene_walk.xml
+
+sim:
+  physics_dt: 0.002
+  control_decimation: 10
+  episode_seconds: 20.0
+
+action:
+  action_scale: 0.25
+
+pd_gains:
+  hip_pitch:   {kp: 100, kd: 2}
+  hip_roll:    {kp: 100, kd: 2}
+  hip_yaw:     {kp: 100, kd: 2}
+  knee:        {kp: 150, kd: 4}
+  ankle_pitch: {kp: 40,  kd: 2}
+  ankle_roll:  {kp: 40,  kd: 2}
+
+command:
+  vx_range: [0.0, 0.6]
+  vy_range: [-0.2, 0.2]
+
+reward_weights:
+  tracking_lin_vel: 1.0
+  tracking_sigma: 0.25
+  alive_bonus: 0.5
+  torque_penalty: 0.0002
+  ang_vel_penalty: 0.1
+  action_rate_penalty: 0.01
+  feet_air_time_bonus: 6.0
+  feet_air_time_threshold_s: 0.2
+  heading_deviation_penalty: 0.5
+
+termination:
+  min_pelvis_height_m: 0.5
+  min_projected_gravity_z: -0.3
+
+ppo:
+  algorithm: PPO
+  policy: MlpPolicy
+  device: cpu
+  learning_rate: 3.0e-4
+  n_steps: 1024
+  batch_size: 256
+  n_epochs: 10
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_range: 0.2
+  ent_coef: 0.0
+  vf_coef: 0.5
+  max_grad_norm: 0.5
+  policy_net: [256, 256]
+  value_net: [256, 256]

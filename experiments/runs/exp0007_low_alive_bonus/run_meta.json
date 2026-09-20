@@ -1,0 +1,11 @@
+{
+  "run_name": "exp0007_low_alive_bonus",
+  "timesteps": 3000000,
+  "n_envs": 12,
+  "seed": 0,
+  "subproc": true,
+  "config_path": "config/exp0007_low_alive_bonus.yaml",
+  "started_at": "2026-09-18T09:43:01",
+  "elapsed_seconds": 402.6394307613373,
+  "finished_at": "2026-09-18T09:49:43"
+}
