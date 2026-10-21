@@ -2,127 +2,169 @@
 
 ## Objective
 
-Evaluate the existing PPO locomotion policy for the Unitree G1 in MuJoCo, focusing on stability, forward velocity tracking, and foot movement. Identify gait limitations and propose three targeted reward-function improvements.
+Evaluate the canonical PPO locomotion policy for the Unitree G1 in MuJoCo, focusing on stability, forward velocity, and foot movement. Document observed gait limitations and propose three reward-function changes for future experiments.
 
-## Baseline
+## Evaluation setup
 
-*Policy:* EXP-0026 (`best_checkpoint_2M.zip`)  
-*Configuration:* `config/exp0012_air_time.yaml`  
-*Evaluation:* 20 deterministic episodes, seeds 1000–1019, 20 seconds each.
+- **Policy:** EXP-0026 (`best_checkpoint_2M.zip`)
+- **Configuration:** `config/exp0012_air_time.yaml`
+- **Simulator:** MuJoCo
+- **Independent diagnostic:** October 21, 2026; 10 seconds at commanded velocity `vx=0.3 m/s`, `vy=0.0 m/s`
+- **Historical reference:** Repository's recorded 20-episode deterministic evaluation (seeds 1000–1019)
 
-The following results come from the repository's previously recorded evaluation, not a newly executed rollout.
+The historical numbers below are from existing project records. The 10-second diagnostic was run separately in GitHub Codespaces.
+
+## Results
+
+### Historical 20-episode evaluation
 
 | Metric | Recorded result |
-|---|---|
+| --- | ---: |
 | Falls | 0 / 20 |
 | Mean episode duration | 20.0 s |
 | Mean velocity error | 0.0361 m/s |
 | Mean net displacement | 4.28 m |
 | Mean reliable distance ratio | 0.918 |
-| Mean absolute endpoint yaw drift (normalized to 10 s) | 17.62° |
+| Mean absolute endpoint yaw drift, normalized to 10 s | 17.62 degrees |
 
-## Observations
+### Independent 10-second gait diagnostic
 
-### 1. Stability
+| Metric | Measured result |
+| --- | ---: |
+| Commanded forward velocity | 0.30 m/s |
+| Commanded lateral velocity | 0.00 m/s |
+| Duration completed | 10.0 s, no termination |
+| Yaw drift | -22.7 degrees |
+| Net forward progress | 2.76 m |
+| Maximum lateral deviation from initial heading | 0.55 m |
+| Left-foot liftoffs | 39 |
+| Right-foot liftoffs | 40 |
+| Left foot airborne | 24% of time |
+| Right foot airborne | 27% of time |
+| Both feet grounded | 49% of time |
+| Both feet airborne | 0% of time |
+| Left-foot vertical-position range | 0.032–0.057 m |
+| Right-foot vertical-position range | 0.033–0.056 m |
 
-The policy maintains upright locomotion throughout the recorded evaluation, with no falls across 20 episodes. However, its heading control remains imperfect. The 17.62° mean normalized yaw drift indicates unintended changes in orientation despite successful balance.
+![Gait diagnostic plot](../results/gait_evaluation/gait_diagnostic.png)
 
-*Assessment:* Stable in the tested simulation conditions, but directional stability needs improvement.
+The full evaluation output is preserved in [`results/gait_evaluation/evaluation_results.json`](../results/gait_evaluation/evaluation_results.json). The diagnostic plot is preserved in [`results/gait_evaluation/gait_diagnostic.png`](../results/gait_evaluation/gait_diagnostic.png).
 
-### 2. Forward Velocity
+## Gait observations
 
-The mean velocity-tracking error of 0.0361 m/s indicates that the policy follows commanded velocities reasonably well.
+### 1. Stability and heading
 
-However, the tracking reward measures velocity in the pelvis frame. Therefore, the robot can track its local forward command while drifting away from its original world-frame direction.
+The robot completed the 10-second diagnostic without termination. This demonstrates upright stability for this particular commanded rollout. However, it accumulated **-22.7 degrees of yaw drift** and reached **0.55 m of lateral deviation** from its initial heading. The historical evaluation also records nonzero yaw drift. The policy can stay upright while failing to walk consistently straight.
 
-*Assessment:* Good basic velocity tracking, but heading drift reduces the quality of straight-line walking.
+**Assessment:** Basic simulated balance is successful in the tested conditions; directional stability remains a significant weakness.
 
-### 3. Foot Movement
+### 2. Forward velocity
 
-The repository's gait investigations document three recurring issues:
+At a commanded speed of 0.30 m/s for 10 seconds, nominal commanded travel is 3.00 m. The diagnostic reports **2.76 m of forward progress**, equivalent to **0.276 m/s average progress** or **92% of nominal commanded travel**. This is a displacement-based comparison, not an instantaneous velocity-tracking-error measurement. The historical evaluation's mean velocity error was 0.0361 m/s.
 
-- Short foot-swing phases, producing a shuffling gait.
-- Wide leg abduction, indicating excessive lateral foot placement.
-- Intermittent loaded-foot slipping during stance.
+The combination of substantial forward progress and yaw drift indicates that good local forward movement does not guarantee a straight world-frame path.
 
-These behaviors suggest that the policy has learned a viable locomotion strategy without consistently achieving desirable walking mechanics.
+**Assessment:** Forward progress is reasonable, but unintended rotation and lateral deviation limit effective straight-line locomotion.
 
-These are documented project-level observations, not new measurements from the canonical checkpoint.
+### 3. Foot movement
 
-*Assessment:* Foot movement is the primary area for improvement.
+The diagnostic counted **39 left-foot and 40 right-foot liftoffs in 10 seconds**, with each foot airborne for only **24–27%** of the rollout. Both feet were grounded for **49%** of the time, with no detected double-flight phase. This suggests rapid, short-duration stepping.
 
-## Proposed Reward-Function Changes
+The left-foot vertical position varied from 0.032 to 0.057 m and the right from 0.033 to 0.056 m (spans of about 2.5 cm and 2.3 cm). These are vertical-position spans, **not validated ground-relative swing clearances**. The plot and contact definitions should be inspected before making a stronger clearance claim.
 
-### 1. Swing-Foot Clearance Reward
+Previous repository investigations describe wide leg abduction and occasional loaded-foot slip, but this specific terminal diagnostic does not directly measure either issue.
 
-Introduce a reward that encourages moderate vertical foot clearance during swing.
+**Assessment:** The measured gait has unusually frequent, short swing events. Foot clearance and stance-contact quality deserve further quantitative evaluation.
 
-*Motivation:* The policy exhibits short swing phases and shuffling behavior.
+## Proposed reward-function changes
 
-*Implementation concept:* Reward foot height near a target clearance only while the foot is airborne and a nonzero walking command is active.
+### 1. Swing-foot clearance reward
 
-*Expected effect:* More distinct steps and reduced foot dragging.
+**Motivation:** Frequent liftoffs and low airborne-time fractions suggest that the controller may be favoring short, rapid steps.
 
-*Potential risk:* Excessive weighting could encourage exaggerated foot lifting.
+**Proposal:** During a valid swing phase and nonzero walking command, reward each foot for approaching a moderate *ground-relative* clearance target. One possible shaping term is:
 
-### 2. Stance-Foot Slip Penalty
+```text
+clearance_reward = weight * sum_over_feet(
+    is_swing * exp(-((clearance - target_clearance) / tolerance)^2)
+)
+```
 
-Penalize horizontal foot velocity when the corresponding foot is in stable ground contact.
+**Expected effect:** More distinct swing phases and less shuffling.
 
-*Motivation:* The repository identifies intermittent loaded-foot slip.
+**Risk:** Too much weight could cause exaggerated foot lifting or unstable stepping. Tune against the existing checkpoint rather than choosing a large weight immediately.
 
-*Implementation concept:*
+### 2. Stance-foot slip penalty
 
-`r_slip = -w_slip * sum(contact_i * ||v_foot_xy_i||²)`
+**Motivation:** Earlier project investigations report intermittent loaded-foot sliding; the independent diagnostic has not yet quantified it.
 
-Use contact filtering to avoid penalizing normal touchdown and liftoff.
+**Proposal:** Penalize horizontal foot velocity only when the foot is in stable contact with the ground:
 
-*Expected effect:* Reduced foot sliding and improved contact stability.
+```text
+slip_penalty = -weight * sum_over_feet(
+    stable_contact * (foot_vx^2 + foot_vy^2)
+)
+```
 
-*Potential risk:* Excessive penalties may discourage stepping and forward motion.
+**Expected effect:** More consistent support contacts and less unwanted sliding.
 
-### 3. Heading-Stabilization Reward Refinement
+**Risk:** A large penalty, or contact detection that includes touchdown/liftoff, could suppress normal stepping. Measure stance-foot speed before concluding that this change helps.
 
-Refine the existing heading-related reward to discourage unintended yaw drift during straight-walking commands.
+### 3. Heading-stabilization refinement
 
-*Motivation:* The recorded evaluation shows significant residual heading drift.
+**Motivation:** The independent straight-walking rollout accumulated -22.7 degrees of yaw drift.
 
-*Implementation concept:* Penalize deviation from the initial heading for straight-walking episodes, with appropriate handling for commanded turning if turning commands are introduced later.
+**Proposal:** Refine the existing heading-related reward to penalize wrapped angular deviation from a desired heading during straight-walking commands:
 
-*Expected effect:* Improved directional consistency and straighter walking trajectories.
+```text
+heading_penalty = -weight * wrapped_heading_error^2
+```
 
-*Potential risk:* Overweighting heading control could cause unnatural compensatory movements or reduced forward progress.
+The desired heading should follow commanded turns if turning is introduced; it should not always be fixed to the episode's initial orientation.
 
-## Recommended Validation
+**Expected effect:** Reduced yaw drift and lateral deviation.
 
-Warm-start from the canonical EXP-0026 checkpoint and test each reward modification separately.
+**Risk:** Overweighting this term may reduce forward motion or produce awkward compensatory movements.
 
-Compare each candidate against the original checkpoint using identical evaluation conditions.
+## Suggested validation plan
 
-Track:
+Test the changes **one at a time**, warm-starting from EXP-0026 where supported. Keep a baseline policy unchanged and use identical seeds, commanded speeds, episode lengths, and physics settings. Compare:
 
-- Fall rate and episode duration
-- Forward velocity-tracking error
-- Net displacement and reliable distance ratio
-- Endpoint yaw drift
-- Foot clearance and swing duration
-- Stance-foot horizontal slip
+| Candidate | Primary measurement | Guardrails |
+| --- | --- | --- |
+| Clearance shaping | Ground-relative swing clearance and swing duration | Falls, velocity error |
+| Slip penalty | Horizontal foot speed during stable stance | Falls, forward progress |
+| Heading refinement | Absolute yaw drift and lateral deviation | Falls, forward progress |
 
-An improvement should demonstrate better gait mechanics without sacrificing survival or velocity tracking.
+A higher reward alone is not evidence of better locomotion. Report actual gait metrics and note any tradeoffs.
+
+## Reproduction
+
+From the repository root, with dependencies installed:
+
+```bash
+python -m evaluation.evaluate \
+  --model experiments/runs/exp0026_air_time_on_exp0023_long/best_checkpoint_2M.zip \
+  --config config/exp0012_air_time.yaml \
+  --episodes 20 > evaluation_results.json
+
+python -m diagnostics.gait_diagnostic \
+  --model experiments/runs/exp0026_air_time_on_exp0023_long/best_checkpoint_2M.zip \
+  --config config/exp0012_air_time.yaml \
+  --vx 0.3 --vy 0.0 --seconds 10 \
+  --out gait_diagnostic.png
+```
+
+The checked-in artifacts were moved to `results/gait_evaluation/` after execution. The evaluation output was generated successfully, but its detailed contents have not been independently inspected for this report; the diagnostic measurements above are transcribed from the terminal output.
 
 ## Conclusion
 
-The existing PPO policy successfully learns basic upright locomotion and accurate velocity tracking under the recorded simulation conditions. However, its gait remains limited by short swing phases, lateral leg movement, foot slip, and heading drift.
-
-The most promising reward-function modifications are swing-foot clearance shaping, stance-foot slip penalization, and heading-stabilization refinement.
-
-These recommendations are hypotheses requiring controlled evaluation, rather than experimentally verified improvements.
+The PPO policy maintains upright locomotion during the tested straight-walking rollout and makes substantial forward progress. Its most clearly demonstrated limitations are **heading drift (-22.7 degrees in 10 seconds)** and **rapid, short-duration foot swings (39–40 liftoffs per foot)**. The three proposed reward changes—swing-foot clearance shaping, stance-foot slip penalization, and heading stabilization—are hypotheses for follow-up experiments, **not improvements already implemented or validated**.
 
 ## Sources
 
-- Repository README and canonical EXP-0026 evaluation summary
-- `docs/FAILURE_ANALYSIS.md`
+- Repository README and recorded EXP-0026 evaluation summary
+- `docs/FAILURE_ANALYSIS.md` (prior gait investigations)
 - `config/exp0012_air_time.yaml`
-- Repository gait diagnostic and evaluation tooling
-
-*Evaluation status:* Review of existing experimental evidence. Fresh MuJoCo rollout and reward ablation experiments have not yet been performed.
+- [Independent evaluation output](../results/gait_evaluation/evaluation_results.json)
+- [Independent gait diagnostic plot](../results/gait_evaluation/gait_diagnostic.png)
