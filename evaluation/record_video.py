@@ -58,6 +58,7 @@ def main() -> None:
         action, _ = model.predict(obs, deterministic=True)
         obs, reward, terminated, truncated, info = env.step(action)
         if step % render_every == 0:
+            camera.lookat[:] = env.data.qpos[:3]
             renderer.update_scene(env.data, camera=camera)
             frames.append(renderer.render().copy())
         step += 1

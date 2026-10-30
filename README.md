@@ -22,6 +22,10 @@ The goal is to make the complete learning pipeline understandable: model → obs
 
 The canonical checkpoint is [`best_checkpoint_2M.zip`](experiments/runs/exp0026_air_time_on_exp0023_long/best_checkpoint_2M.zip), from EXP-0026. Use it with **`config/exp0012_air_time.yaml`**, rather than the minimal default reward configuration.
 
+**[▶ Watch the canonical policy walking (20-second video)](experiments/runs/exp0026_air_time_on_exp0023_long/rollout_seed1002_follow_camera.mp4)**
+
+This recorded rollout uses the canonical checkpoint and matching config above, with deterministic actions and seed 1002. The robot completes the full 20-second episode without falling; the camera follows it throughout. No new training was performed.
+
 Recorded deterministic evaluation over seeds 1000–1019, with a 20-second horizon and clean simulation physics:
 
 | Metric | Recorded result |
